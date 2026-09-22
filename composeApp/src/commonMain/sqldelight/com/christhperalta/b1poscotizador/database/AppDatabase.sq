@@ -1,0 +1,79 @@
+
+
+CREATE TABLE ManagerConfig (
+    id                    INTEGER NOT NULL PRIMARY KEY,
+    username              TEXT    NOT NULL,
+    password              TEXT    NOT NULL
+);
+
+CREATE TABLE ServerConfig (
+    id            INTEGER NOT NULL PRIMARY KEY,
+    protocol      TEXT    NOT NULL,
+    host          TEXT    NOT NULL,
+    port          TEXT    NOT NULL,
+    database_name TEXT    NOT NULL
+);
+
+CREATE TABLE StoreConfig (
+    id                    INTEGER NOT NULL PRIMARY KEY,
+    -- Seller
+    seller_code           TEXT    NOT NULL,
+    seller_name           TEXT    NOT NULL,
+    -- Warehouse (Almacén)
+    warehouse_code        TEXT    NOT NULL,
+    warehouse_name        TEXT    NOT NULL,
+    -- Customer (Cliente)
+    customer_code         TEXT    NOT NULL,
+    customer_name         TEXT    NOT NULL,
+    -- Price List (Lista de Precios)
+    price_code            TEXT    NOT NULL,
+    price_name            TEXT    NOT NULL,
+    -- Campos simples
+    terminal_number       TEXT    NOT NULL,
+    card_code             TEXT    NOT NULL,
+    card_name             TEXT    NOT NULL,
+    doc_currency          TEXT    NOT NULL,
+    tax_code              TEXT    NOT NULL,
+    rnc                   TEXT    NOT NULL
+);
+
+
+
+upsertManagerCredentials:
+INSERT OR REPLACE INTO ManagerConfig(id,username,password)
+VALUES(1, ?, ?);
+
+getManagerCredentialsConfig:
+SELECT * FROM ManagerConfig WHERE id = 1;
+-- ServerConfig queries
+upsertServer:
+INSERT OR REPLACE INTO ServerConfig(id, protocol, host, port, database_name)
+VALUES(1, ?, ?, ?, ?);
+
+getServerConfig:
+SELECT * FROM ServerConfig WHERE id = 1;
+
+deleteServerConfig:
+DELETE FROM ServerConfig WHERE id = 1;
+
+-- StoreConfig queries
+upsertStore:
+INSERT OR REPLACE INTO StoreConfig(
+    id,
+    seller_code, seller_name,
+    warehouse_code, warehouse_name,
+    customer_code, customer_name,
+    price_code, price_name,
+    terminal_number,
+    card_code, card_name,
+    doc_currency,
+    tax_code,
+    rnc
+)
+VALUES(1,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);
+
+getStoreConfig:
+SELECT * FROM StoreConfig WHERE id = 1;
+
+deleteStoreConfig:
+DELETE FROM StoreConfig WHERE id = 1;
