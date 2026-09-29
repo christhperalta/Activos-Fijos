@@ -27,29 +27,25 @@ class ProductDetailViewModel (
     fun fetchProduct(productId: String? = null, productBarcode : String? = null) {
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update {
+                it.copy(product = null, errorMessage = null, isLoading = true)
+            }
             _quantity.update { 1 }
-            if (productBarcode != null ) {
-                productRepository.getProductByBarCode(productBarcode)
-                    .onSuccess { product ->
-                        _uiState.update { it.copy(product = product, isLoading = false) }
-                    }
-                    .onFailure { error ->
-                        _uiState.update {
-                            it.copy(errorMessage = error.message, isLoading = false) }
-                    }
+            val result = when {
+                productBarcode != null -> productRepository.getProductByBarCode(productBarcode)
+                productId != null -> productRepository.getProductById(productId)
+                else -> Result.failure(IllegalArgumentException("Se requiere un identificador de activo"))
             }
 
-            if(productId != null)  {
-                productRepository.getProductById(productId)
-                    .onSuccess { product ->
-                        _uiState.update { it.copy(product = product, isLoading = false) }
+            result
+                .onSuccess { product ->
+                    _uiState.update { it.copy(product = product, isLoading = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(errorMessage = error.message, isLoading = false)
                     }
-                    .onFailure { error ->
-                        _uiState.update {
-                            it.copy(errorMessage = error.message, isLoading = false) }
-                    }
-            }
+                }
         }
     }
 }
