@@ -136,9 +136,35 @@
      <!--ProductDetailScreen-->
      <string name="product_detail_not_found_title">Producto no encontrado</string>
      <string name="product_detail_error_icon_desc">Error icon</string>
-     <string name="product_detail_retry_button">Reintentar</string>
-     <string name="product_detail_sku_label">SKU: %s</string>
-     <string name="product_detail_add_to_cart">Agregar a la lista</string>
+      <string name="product_detail_retry_button">Reintentar</string>
+      <string name="product_detail_sku_label">SKU: %s</string>
+      <string name="product_detail_add_to_cart">Agregar a la lista</string>
+      <string name="product_detail_title">Detalle del activo</string>
+      <string name="product_detail_back_description">Volver</string>
+      <string name="product_detail_image_placeholder">Imagen del activo no disponible</string>
+      <string name="product_detail_location_title">Ubicación del activo</string>
+      <string name="product_detail_branch_label">Sucursal</string>
+      <string name="product_detail_department_label">Departamento</string>
+      <string name="product_detail_office_label">Oficina</string>
+      <string name="product_detail_warehouse_label">Almacén</string>
+      <string name="product_detail_status_label">Estado del activo</string>
+      <string name="product_detail_load_error">No pudimos cargar el activo</string>
+      <string name="product_detail_placeholder_name">Laptop Dell Latitude 5420</string>
+      <string name="product_detail_placeholder_code">AF-000124</string>
+      <string name="product_detail_placeholder_branch">Santo Domingo</string>
+      <string name="product_detail_placeholder_department">Tecnología</string>
+      <string name="product_detail_placeholder_office">Soporte técnico</string>
+      <string name="product_detail_placeholder_warehouse">Almacén principal</string>
+      <string name="product_detail_placeholder_status">Activo</string>
+      <string name="product_detail_edit">Editar</string>
+      <string name="product_detail_edit_title">Actualizar información</string>
+      <string name="product_detail_save">Guardar cambios</string>
+      <string name="product_detail_cancel">Cancelar</string>
+      <string name="product_detail_name_label">Nombre del activo</string>
+      <string name="product_detail_code_label">Código del activo</string>
+      <string name="product_detail_status_active">Activo</string>
+      <string name="product_detail_status_inactive">Inactivo</string>
+      <string name="product_detail_status_decommissioned">Dado de baja</string>
 
      <!--ScannerScreen-->
      <string name="scanner_flashlight_description">Linterna</string>
