@@ -24,6 +24,17 @@ import com.christhperalta.activosfijos.feature.onboarding.presentation.Onboardin
 import com.christhperalta.activosfijos.feature.pdf.presentation.PdfScreen
 import com.christhperalta.activosfijos.feature.product.presentation.ProductDetailScreen
 import com.christhperalta.activosfijos.feature.scanner.presentation.ScannerScreen
+import com.christhperalta.activosfijos.feature.inventory.domain.AssetCondition
+import com.christhperalta.activosfijos.feature.inventory.domain.AssetRegistration
+import com.christhperalta.activosfijos.feature.inventory.domain.InventoryRepository
+import com.christhperalta.activosfijos.feature.inventory.presentation.AssetInformationScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.ConditionFormScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.CountConfirmationScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.CountSummaryScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.ScannedAssetDetailScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.ScannedAssetsScreen
+import com.christhperalta.activosfijos.feature.inventory.presentation.VerifyAssetScreen
+import org.koin.compose.koinInject
 
 private fun NavBackStack<NavKey>.popUntilHomeIsTop() {
     while (true) {
@@ -67,6 +78,7 @@ private val ScaleFadePopExit: ExitTransition =
 @Composable
 fun AppNavigation(startKey: NavKey) {
     val backStack = rememberNavBackStack(navConfig, Home)
+    val inventoryRepository: InventoryRepository = koinInject()
 
     NavDisplay(
         backStack = backStack,
@@ -108,26 +120,87 @@ fun AppNavigation(startKey: NavKey) {
 
                 is Home -> NavEntry(key) {
                     HomeScreen(
-                        onLogin = {
-                            backStack.removeLastOrNull()
-                            backStack.add(Login)
-                        },
                         onScanner = { backStack.add(Scanner) },
-                        onProduct = { productId , productBarCode ->
-                            backStack.add(Product(productId = productId, productBarCode = productBarCode))
-                        },
-                        onSearchProduct = {
-                            backStack.add(SearchProduct)
-                        },
-                        onQuotation = { backStack.add(Quotation) }
+                        onSummary = { backStack.add(CountSummary) },
+                        onAssets = { backStack.add(ScannedAssets) },
                     )
                 }
 
                 is Scanner -> NavEntry(key) {
                     ScannerScreen(
-                        onProduct = { productId, productBarCode ->
-                            backStack.add(Product(productId = productId, productBarCode = productBarCode))
-                        }
+                        onBack = { backStack.removeLastOrNull() },
+                        onHome = { backStack.popUntilHomeIsTop() },
+                        onAsset = { assetCode -> backStack.add(AssetInformation(assetCode)) },
+                    )
+                }
+
+                is AssetInformation -> NavEntry(key) {
+                    AssetInformationScreen(
+                        assetCode = key.assetCode,
+                        onBack = { backStack.removeLastOrNull() },
+                        onConfirm = { backStack.add(VerifyAsset(it)) },
+                    )
+                }
+
+                is VerifyAsset -> NavEntry(key) {
+                    VerifyAssetScreen(
+                        assetCode = key.assetCode,
+                        onBack = { backStack.removeLastOrNull() },
+                        onGood = { code ->
+                            inventoryRepository.register(code, AssetRegistration(AssetCondition.GOOD))
+                            backStack.add(CountConfirmation(code))
+                        },
+                        onMaintenance = { backStack.add(MaintenanceForm(it)) },
+                        onDecommission = { backStack.add(PendingDecommissionForm(it)) },
+                    )
+                }
+
+                is MaintenanceForm -> NavEntry(key) {
+                    ConditionFormScreen(
+                        assetCode = key.assetCode,
+                        condition = AssetCondition.MAINTENANCE,
+                        onBack = { backStack.removeLastOrNull() },
+                        onRegistered = { backStack.add(CountConfirmation(it)) },
+                    )
+                }
+
+                is PendingDecommissionForm -> NavEntry(key) {
+                    ConditionFormScreen(
+                        assetCode = key.assetCode,
+                        condition = AssetCondition.PENDING_DECOMMISSION,
+                        onBack = { backStack.removeLastOrNull() },
+                        onRegistered = { backStack.add(CountConfirmation(it)) },
+                    )
+                }
+
+                is CountConfirmation -> NavEntry(key) {
+                    CountConfirmationScreen(
+                        assetCode = key.assetCode,
+                        onScanNext = {
+                            while (backStack.lastOrNull() !is Scanner) backStack.removeLastOrNull()
+                        },
+                        onSummary = { backStack.add(CountSummary) },
+                    )
+                }
+
+                is CountSummary -> NavEntry(key) {
+                    CountSummaryScreen(
+                        onBack = { backStack.removeLastOrNull() },
+                        onContinue = { backStack.add(Scanner) },
+                    )
+                }
+
+                is ScannedAssets -> NavEntry(key) {
+                    ScannedAssetsScreen(
+                        onBack = { backStack.removeLastOrNull() },
+                        onAsset = { assetCode -> backStack.add(ScannedAssetDetail(assetCode)) },
+                    )
+                }
+
+                is ScannedAssetDetail -> NavEntry(key) {
+                    ScannedAssetDetailScreen(
+                        assetCode = key.assetCode,
+                        onBack = { backStack.removeLastOrNull() },
                     )
                 }
 

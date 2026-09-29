@@ -13,12 +13,18 @@ val navConfig = SavedStateConfiguration {
             subclass(Config::class, Config.serializer())
             subclass(Onboarding::class, Onboarding.serializer())
             subclass(Scanner::class, Scanner.serializer())
+            subclass(AssetInformation::class, AssetInformation.serializer())
+            subclass(VerifyAsset::class, VerifyAsset.serializer())
+            subclass(MaintenanceForm::class, MaintenanceForm.serializer())
+            subclass(PendingDecommissionForm::class, PendingDecommissionForm.serializer())
+            subclass(CountConfirmation::class, CountConfirmation.serializer())
+            subclass(CountSummary::class, CountSummary.serializer())
+            subclass(ScannedAssets::class, ScannedAssets.serializer())
+            subclass(ScannedAssetDetail::class, ScannedAssetDetail.serializer())
             subclass(Product::class, Product.serializer())
             subclass(Quotation::class, Quotation.serializer())
             subclass(Pdf::class, Pdf.serializer())
             subclass(SearchProduct::class, SearchProduct.serializer())
         }
     }
-
-
 }
