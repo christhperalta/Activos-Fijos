@@ -134,7 +134,6 @@ fun AppNavigation(startKey: NavKey) {
                 is Product -> NavEntry(key) {
                     ProductDetailScreen(
                         productId = key.productId,
-                        productBarcode = key.productBarCode,
                         onBack = { backStack.popUntilHomeIsTop() },
                         onLogin = {
                             backStack.removeLastOrNull()
