@@ -36,6 +36,8 @@ import com.christhperalta.activosfijos.feature.product.data.repository.ProductRe
 import com.christhperalta.activosfijos.feature.product.domain.repository.ProductRepository
 import com.christhperalta.activosfijos.feature.product.presentation.ProductDetailViewModel
 import com.christhperalta.activosfijos.feature.scanner.presentation.ScannerViewModel
+import com.christhperalta.activosfijos.feature.inventory.data.FakeInventoryRepository
+import com.christhperalta.activosfijos.feature.inventory.domain.InventoryRepository
 import com.christhperalta.activosfijos.platformModule
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -73,6 +75,7 @@ val repositoryModule = module {
     single<LoginRepository> { LoginRepositoryImpl(get()) }
     single<PdfRepository> { PdfRepositoryImpl(get()) }
     single<ProductRepository> { ProductRepositoryImpl(get()) }
+    single<InventoryRepository> { FakeInventoryRepository() }
 
 
 }
