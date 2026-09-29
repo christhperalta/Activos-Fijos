@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 // 🎨 Brand
 val BluePrimary    = Color(0xFF0156A6)
-val BlueLight      = Color(0xFFF0F4F8)
+val BlueLight      = Color(0xFFE6EDF4)
 val BlueMuted      = Color(0xFFC2D6E9)
 val BlueDarker     = Color(0xFF013F7A)
 val TextPrimary    = Color(0xFF1A1A1A)
@@ -16,3 +16,7 @@ val ErrorContainer = Color(0xFFFFEBEE)
 val SuccessColor   = Color(0xFF4CAF50)
 val SuccessContainer = Color(0xFFE8F5E9)
 val White          = Color(0xFFFFFFFF)
+val SurfaceLow     = Color(0xFFF6F9FC)
+val SurfaceContainer = Color(0xFFEDF2F7)
+val SurfaceHigh    = Color(0xFFE4ECF3)
+val SurfaceHighest = Color(0xFFDCE6EF)

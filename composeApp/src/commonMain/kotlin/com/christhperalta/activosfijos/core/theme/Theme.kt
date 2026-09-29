@@ -12,7 +12,7 @@ val LightColorScheme = lightColorScheme(
     onPrimaryContainer = BlueDarker,
     secondary          = BlueMuted,
     onSecondary        = BluePrimary,
-    background         = White,
+    background         = BlueLight,
     onBackground       = TextPrimary,
     surface            = BlueLight,
     onSurface          = TextPrimary,
@@ -20,6 +20,11 @@ val LightColorScheme = lightColorScheme(
     error              = ErrorColor,
     errorContainer     = ErrorContainer,
     onError            = White,
+    surfaceContainerLowest = White,
+    surfaceContainerLow    = SurfaceLow,
+    surfaceContainer       = SurfaceContainer,
+    surfaceContainerHigh   = SurfaceHigh,
+    surfaceContainerHighest = SurfaceHighest,
 )
 @Composable
 fun AppTheme(
