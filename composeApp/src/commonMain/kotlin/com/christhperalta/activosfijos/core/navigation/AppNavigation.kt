@@ -77,7 +77,7 @@ private val ScaleFadePopExit: ExitTransition =
 
 @Composable
 fun AppNavigation(startKey: NavKey) {
-    val backStack = rememberNavBackStack(navConfig, Home)
+    val backStack = rememberNavBackStack(navConfig, startKey)
     val inventoryRepository: InventoryRepository = koinInject()
 
     NavDisplay(
