@@ -50,4 +50,63 @@ class FakeInventoryRepositoryTest {
         repository.register("AF-000125", AssetRegistration(AssetCondition.GOOD))
         assertFalse(repository.register("AF-000125", AssetRegistration(AssetCondition.MAINTENANCE)))
     }
+
+    @Test
+    fun updateAssetClassification_updatesTheAsset() {
+        val updated = repository.updateAssetClassification(
+            code = "AF-000125",
+            category = "Mobiliario",
+            location = "Dirección",
+            branch = "SUCURSAL SANTIAGO",
+            position = "ANALISTA TECNOLOGIA 1",
+        )
+
+        assertTrue(updated)
+        assertEquals("Mobiliario", repository.findAsset("AF-000125")?.category)
+        assertEquals("Dirección", repository.assets.value.first { it.code == "AF-000125" }.location)
+        assertEquals("SUCURSAL SANTIAGO", repository.findAsset("AF-000125")?.branch)
+        assertEquals("ANALISTA TECNOLOGIA 1", repository.findAsset("AF-000125")?.position)
+    }
+
+    @Test
+    fun updateAssetClassification_updatesScannedAsset() {
+        repository.recordScan("AF-000125")
+
+        val updated = repository.updateAssetClassification(
+            code = "AF-000125",
+            category = "Equipos de oficina",
+            location = "Recursos Humanos",
+            branch = "SUCURSAL PRINCIPAL - ND",
+            position = "ASISTENTE ADMINISTRACION",
+        )
+
+        assertTrue(updated)
+        assertEquals("Equipos de oficina", repository.scannedAssets.value.single().category)
+        assertEquals("Recursos Humanos", repository.scannedAssets.value.single().location)
+        assertEquals("SUCURSAL PRINCIPAL - ND", repository.scannedAssets.value.single().branch)
+        assertEquals("ASISTENTE ADMINISTRACION", repository.scannedAssets.value.single().position)
+    }
+
+    @Test
+    fun updateAssetClassification_rejectsUnknownAssetAndInvalidOptions() {
+        assertFalse(
+            repository.updateAssetClassification(
+                code = "UNKNOWN-001",
+                category = "Mobiliario",
+                location = "Dirección",
+                branch = "SUCURSAL PRINCIPAL",
+                position = "ANALISTA CONTABILIDAD",
+            )
+        )
+        assertFalse(
+            repository.updateAssetClassification(
+                code = "AF-000125",
+                category = "Categoría inexistente",
+                location = "Dirección",
+                branch = "SUCURSAL PRINCIPAL",
+                position = "ANALISTA CONTABILIDAD",
+            )
+        )
+        assertEquals("Equipos tecnológicos", repository.findAsset("AF-000125")?.category)
+    }
 }

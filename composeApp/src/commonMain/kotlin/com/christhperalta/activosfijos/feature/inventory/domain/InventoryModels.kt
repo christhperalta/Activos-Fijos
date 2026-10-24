@@ -14,6 +14,8 @@ data class Asset(
     val category: String,
     val location: String,
     val responsible: String,
+    val branch: String = "SUCURSAL PRINCIPAL",
+    val position: String = "ANALISTA CONTABILIDAD",
 )
 
 data class AssetRegistration(

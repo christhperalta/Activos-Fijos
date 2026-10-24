@@ -25,19 +25,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -46,10 +54,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -188,8 +198,14 @@ fun AssetInformationScreen(
     onConfirm: (String) -> Unit,
     repository: InventoryRepository = koinInject(),
 ) {
-    val asset = remember(assetCode) { repository.findAsset(assetCode) }
-    AssetScaffold("Información del activo", onBack) { padding ->
+    val assets by repository.assets.collectAsStateWithLifecycle()
+    val asset = assets.firstOrNull { it.code.equals(assetCode, ignoreCase = true) }
+    var isEditingClassification by remember { mutableStateOf(false) }
+    AssetScaffold(
+        title = "Información del activo",
+        onBack = onBack,
+        onEdit = if (asset != null) ({ isEditingClassification = true }) else null,
+    ) { padding ->
         if (asset == null) {
             EmptyAssetContent("No encontramos el activo $assetCode")
         } else {
@@ -204,6 +220,7 @@ fun AssetInformationScreen(
                     AssetInfoRow(Icons.Default.Inventory2, "Número de serie", asset.serialNumber)
                     AssetInfoRow(Icons.Default.Computer, "Categoría", asset.category)
                     AssetInfoRow(Icons.Default.LocationOn, "Ubicación registrada", asset.location)
+                    AssetInfoRow(Icons.Default.Work, "Posicion", asset.position)
                     AssetInfoRow(
                         Icons.Default.Person,
                         "Responsable",
@@ -218,6 +235,19 @@ fun AssetInformationScreen(
                 )
             }
         }
+    }
+    if (isEditingClassification && asset != null) {
+        AssetClassificationEditSheet(
+            asset = asset,
+            categories = repository.availableCategories,
+            locations = repository.availableLocations,
+            branches = repository.availableBranches,
+            positions = repository.availablePositions,
+            onSave = { category, location, branch, position ->
+                repository.updateAssetClassification(asset.code, category, location, branch, position)
+            },
+            onDismiss = { isEditingClassification = false },
+        )
     }
 }
 
@@ -445,6 +475,7 @@ fun CountSummaryScreen(
 internal fun AssetScaffold(
     title: String,
     onBack: () -> Unit,
+    onEdit: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -460,6 +491,22 @@ internal fun AssetScaffold(
                             "Volver",
                             tint = MaterialTheme.colorScheme.primary
                         )
+                    }
+                },
+                actions = {
+                    onEdit?.let { edit ->
+                        FilledIconButton(
+                            onClick = edit,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = Color.White,
+                                contentColor = MaterialTheme.colorScheme.primary,
+                            ),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar categoría y ubicación",
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -726,6 +773,187 @@ internal fun AssetInfoRow(
         }
     }
     if (showDivider) HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun AssetClassificationEditSheet(
+    asset: Asset,
+    categories: List<String>,
+    locations: List<String>,
+    branches: List<String>,
+    positions: List<String>,
+    onSave: (category: String, location: String, branch: String, position: String) -> Boolean,
+    onDismiss: () -> Unit,
+) {
+    var category by remember(asset.code, asset.category) { mutableStateOf(asset.category) }
+    var location by remember(asset.code, asset.location) { mutableStateOf(asset.location) }
+    var branch by remember(asset.code, asset.branch) { mutableStateOf(asset.branch) }
+    var position by remember(asset.code, asset.position) { mutableStateOf(asset.position) }
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var locationExpanded by remember { mutableStateOf(false) }
+    var branchExpanded by remember { mutableStateOf(false) }
+    var positionExpanded by remember { mutableStateOf(false) }
+    var saveError by remember { mutableStateOf(false) }
+    val hasChanges = category != asset.category ||
+        location != asset.location ||
+        branch != asset.branch ||
+        position != asset.position
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                "Editar clasificación",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                asset.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ClassificationDropdown(
+                label = "Categoría",
+                value = category,
+                icon = Icons.Default.Computer,
+                options = categories,
+                expanded = categoryExpanded,
+                onExpandedChange = { categoryExpanded = it },
+                onOptionSelected = {
+                    category = it
+                    saveError = false
+                },
+            )
+            ClassificationDropdown(
+                label = "Sucursal",
+                value = branch,
+                icon = Icons.Default.Business,
+                options = branches,
+                expanded = branchExpanded,
+                onExpandedChange = { branchExpanded = it },
+                onOptionSelected = {
+                    branch = it
+                    saveError = false
+                },
+            )
+            ClassificationDropdown(
+                label = "Departamento",
+                value = location,
+                icon = Icons.Default.LocationOn,
+                options = locations,
+                expanded = locationExpanded,
+                onExpandedChange = { locationExpanded = it },
+                onOptionSelected = {
+                    location = it
+                    saveError = false
+                },
+            )
+            ClassificationDropdown(
+                label = "Posicion",
+                value = position,
+                icon = Icons.Default.Work,
+                options = positions,
+                expanded = positionExpanded,
+                onExpandedChange = { positionExpanded = it },
+                onOptionSelected = {
+                    position = it
+                    saveError = false
+                },
+            )
+            if (saveError) {
+                Text(
+                    "No pudimos actualizar la clasificación del activo.",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancelar")
+                }
+                Button(
+                    enabled = hasChanges,
+                    onClick = {
+                        if (onSave(category, location, branch, position)) onDismiss() else saveError = true
+                    },
+                ) {
+                    Text("Guardar")
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ClassificationDropdown(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    options: List<String>,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onOptionSelected: (String) -> Unit,
+) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {},
+            readOnly = true,
+            label = {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+            shape = MaterialTheme.shapes.large,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        onExpandedChange(false)
+                    },
+                )
+            }
+        }
+    }
 }
 
 @Composable

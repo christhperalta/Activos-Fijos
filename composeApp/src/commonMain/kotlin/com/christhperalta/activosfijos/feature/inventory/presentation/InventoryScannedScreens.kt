@@ -33,7 +33,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,9 +95,15 @@ fun ScannedAssetDetailScreen(
     onBack: () -> Unit,
     repository: InventoryRepository = koinInject(),
 ) {
-    val asset = remember(assetCode) { repository.findAsset(assetCode) }
+    val assets by repository.assets.collectAsStateWithLifecycle()
+    val asset = assets.firstOrNull { it.code.equals(assetCode, ignoreCase = true) }
     val registration = remember(assetCode) { repository.registrationFor(assetCode) }
-    AssetScaffold("Detalle del activo", onBack) { padding ->
+    var isEditingClassification by remember { mutableStateOf(false) }
+    AssetScaffold(
+        title = "Detalle del activo",
+        onBack = onBack,
+        onEdit = if (asset != null) ({ isEditingClassification = true }) else null,
+    ) { padding ->
         if (asset == null) {
             EmptyAssetContent("No encontramos el activo $assetCode")
         } else {
@@ -114,6 +122,19 @@ fun ScannedAssetDetailScreen(
                 RegistrationStatusCard(registration)
             }
         }
+    }
+    if (isEditingClassification && asset != null) {
+        AssetClassificationEditSheet(
+            asset = asset,
+            categories = repository.availableCategories,
+            locations = repository.availableLocations,
+            branches = repository.availableBranches,
+            positions = repository.availablePositions,
+            onSave = { category, location, branch, position ->
+                repository.updateAssetClassification(asset.code, category, location, branch, position)
+            },
+            onDismiss = { isEditingClassification = false },
+        )
     }
 }
 

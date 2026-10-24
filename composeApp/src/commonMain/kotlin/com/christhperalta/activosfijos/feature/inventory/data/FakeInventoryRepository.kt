@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.update
 
 /** In-memory source used until the inventory API and offline store are available. */
 class FakeInventoryRepository : InventoryRepository {
-    private val assets = listOf(
+    private val _assets = MutableStateFlow(listOf(
         Asset(
             code = "AF-000125",
             name = "Laptop Dell Latitude",
             serialNumber = "SN-8H73K92",
-            category = "Equipos tecnologicos",
+            category = "Equipos tecnológicos",
             location = "Contabilidad",
             responsible = "Juan Perez",
         ),
@@ -25,7 +25,7 @@ class FakeInventoryRepository : InventoryRepository {
             code = "AF-000126",
             name = "Monitor Dell 24 pulgadas",
             serialNumber = "SN-2K91D43",
-            category = "Equipos tecnologicos",
+            category = "Equipos tecnológicos",
             location = "Contabilidad",
             responsible = "Maria Rodriguez",
         ),
@@ -42,10 +42,10 @@ class FakeInventoryRepository : InventoryRepository {
             name = "Silla ergonomica",
             serialNumber = "SIN SERIE",
             category = "Mobiliario",
-            location = "Direccion",
+            location = "Dirección",
             responsible = "Carlos Gomez",
         ),
-    )
+    ))
 
     private val registrations = mutableMapOf<String, AssetRegistration>()
     private val _summary = MutableStateFlow(
@@ -59,11 +59,67 @@ class FakeInventoryRepository : InventoryRepository {
     )
     private val _scannedAssets = MutableStateFlow<List<Asset>>(emptyList())
 
+    override val assets: StateFlow<List<Asset>> = _assets.asStateFlow()
     override val summary: StateFlow<InventorySummary> = _summary.asStateFlow()
     override val scannedAssets: StateFlow<List<Asset>> = _scannedAssets.asStateFlow()
+    override val availableCategories = listOf(
+        "Equipos tecnológicos",
+        "Equipos de oficina",
+        "Mobiliario",
+    )
+    override val availableLocations = listOf(
+        "Contabilidad",
+        "Recursos Humanos",
+        "Dirección",
+    )
+    override val availableBranches = listOf(
+        "SUCURSAL PRINCIPAL",
+        "SUCURSAL PRINCIPAL - ND",
+        "SUCURSAL SANTIAGO",
+    )
+    override val availablePositions = listOf(
+        "ANALISTA CONTABILIDAD",
+        "ASISTENTE ADMINISTRACION",
+        "ANALISTA TECNOLOGIA 1",
+        "ANALISTA TECNOLOGIA 2",
+    )
 
     override fun findAsset(code: String): Asset? =
-        assets.firstOrNull { it.code.equals(code.trim(), ignoreCase = true) }
+        assets.value.firstOrNull { it.code.equals(code.trim(), ignoreCase = true) }
+
+    override fun updateAssetClassification(
+        code: String,
+        category: String,
+        location: String,
+        branch: String,
+        position: String,
+    ): Boolean {
+        if (
+            category !in availableCategories ||
+            location !in availableLocations ||
+            branch !in availableBranches ||
+            position !in availablePositions
+        ) return false
+
+        val asset = findAsset(code) ?: return false
+        val updatedAsset = asset.copy(
+            category = category,
+            location = location,
+            branch = branch,
+            position = position,
+        )
+        _assets.update { assets ->
+            assets.map { current ->
+                if (current.code == asset.code) updatedAsset else current
+            }
+        }
+        _scannedAssets.update { scannedAssets ->
+            scannedAssets.map { current ->
+                if (current.code == asset.code) updatedAsset else current
+            }
+        }
+        return true
+    }
 
     override fun recordScan(code: String) {
         val asset = findAsset(code) ?: return
@@ -83,7 +139,7 @@ class FakeInventoryRepository : InventoryRepository {
     }
 
     override fun pendingAssets(): List<Asset> =
-        assets.filterNot { registrations.containsKey(it.code) }
+        assets.value.filterNot { registrations.containsKey(it.code) }
 
     override fun markNotFound(code: String): Boolean =
         register(code, AssetRegistration(condition = AssetCondition.NOT_FOUND))
