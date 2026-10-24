@@ -31,7 +31,9 @@ kotlin {
         }
         iosTarget.compilations.getByName("main") {
             cinterops {
-                val CommonCrypto by creating
+                val CommonCrypto by creating {
+                    definitionFile.set(project.file("src/iosMain/cinterop/CommonCrypto.def"))
+                }
             }
         }
     }
