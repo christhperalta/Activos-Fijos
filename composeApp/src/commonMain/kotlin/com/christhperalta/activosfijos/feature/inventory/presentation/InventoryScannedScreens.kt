@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,7 +53,20 @@ fun ScannedAssetsScreen(
     repository: InventoryRepository = koinInject(),
 ) {
     val scannedAssets by repository.scannedAssets.collectAsStateWithLifecycle()
-    AssetScaffold("Activos escaneados", onBack) { padding ->
+    AssetScaffold(
+        title = "Activos escaneados",
+        onBack = onBack,
+        bottomBar = {
+            BottomAppBar {
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                ) {
+                    Text("Enviar activos escaneados a SAP")
+                }
+            }
+        },
+    ) { padding ->
         if (scannedAssets.isEmpty()) {
             EmptyAssetContent(
                 message = "Aún no has escaneado activos",

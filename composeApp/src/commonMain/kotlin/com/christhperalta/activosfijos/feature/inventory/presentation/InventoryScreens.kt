@@ -445,6 +445,7 @@ fun CountSummaryScreen(
 internal fun AssetScaffold(
     title: String,
     onBack: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -464,6 +465,7 @@ internal fun AssetScaffold(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
             )
         },
+        bottomBar = bottomBar,
         content = content,
     )
 }
