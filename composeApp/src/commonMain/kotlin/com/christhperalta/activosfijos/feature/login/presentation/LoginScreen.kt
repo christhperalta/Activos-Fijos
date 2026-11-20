@@ -31,11 +31,11 @@ fun LoginScreen(
     var configPassword by remember { mutableStateOf("") }
     var isConfigError by remember { mutableStateOf(false) }
 
-//    LaunchedEffect(uiState.loginResponse) {
-//        if (uiState.loginResponse != null) {
-//            onHome()
-//        }
-//    }
+    LaunchedEffect(uiState.loginResponse) {
+        if (uiState.loginResponse != null) {
+            onHome()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -52,8 +52,7 @@ fun LoginScreen(
                 vm.onEvent(LoginEvents.OnPasswordChanged(it))
             },
             onLoginClick = {
-//                vm.onEvent(LoginEvents.OnLoginClicked)
-                onHome()
+                vm.onEvent(LoginEvents.OnLoginClicked)
             },
             onConfigClick = {
                 isDialogOpen = true
