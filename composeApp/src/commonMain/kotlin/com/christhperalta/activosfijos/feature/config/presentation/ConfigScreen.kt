@@ -108,80 +108,80 @@ fun SetupScreen(
                     onSave = { viewModel.serverEvents(ConfigEvent.Server.SaveConfig) },
                 )
 
-                StoreSection(
-                    state = state,
-                    callbacks = StoreSectionCallbacks(
-                        onSellerChange = { name, code ->
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnSellerChange(
-                                    name,
-                                    code
-                                )
-                            )
-                        },
-                        onWarehouseChange = { name, code ->
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnWarehouseChange(
-                                    name,
-                                    code
-                                )
-                            )
-                        },
-                        onCustomerChange = { name, code ->
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnCustomerChange(
-                                    name,
-                                    code
-                                )
-                            )
-                        },
-                        onCardNameChange = {
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnCardNameChange(
-                                    it
-                                )
-                            )
-                        },
-                        onDocCurrencyChange = {
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnDocCurrencyChange(
-                                    it
-                                )
-                            )
-                        },
-                        onTaxCodeChange = {
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnTaxCodeChange(
-                                    it
-                                )
-                            )
-                        },
-                        onTerminalNumberChange = {
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnTerminalNumberChange(
-                                    it
-                                )
-                            )
-                        },
-                        onCardCodeChange = {
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnCardCodeChange(
-                                    it
-                                )
-                            )
-                        },
-                        onPriceListChange = { name, code ->
-                            viewModel.storageEvents(
-                                ConfigEvent.Storage.OnPriceListChange(
-                                    name,
-                                    code
-                                )
-                            )
-                        },
-                        onRnc = { viewModel.storageEvents(ConfigEvent.Storage.OnRncChange(it)) },
-                        onSave = { viewModel.storageEvents(ConfigEvent.Storage.SaveStoreConfig) },
-                    )
-                )
+//                StoreSection(
+//                    state = state,
+//                    callbacks = StoreSectionCallbacks(
+//                        onSellerChange = { name, code ->
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnSellerChange(
+//                                    name,
+//                                    code
+//                                )
+//                            )
+//                        },
+//                        onWarehouseChange = { name, code ->
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnWarehouseChange(
+//                                    name,
+//                                    code
+//                                )
+//                            )
+//                        },
+//                        onCustomerChange = { name, code ->
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnCustomerChange(
+//                                    name,
+//                                    code
+//                                )
+//                            )
+//                        },
+//                        onCardNameChange = {
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnCardNameChange(
+//                                    it
+//                                )
+//                            )
+//                        },
+//                        onDocCurrencyChange = {
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnDocCurrencyChange(
+//                                    it
+//                                )
+//                            )
+//                        },
+//                        onTaxCodeChange = {
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnTaxCodeChange(
+//                                    it
+//                                )
+//                            )
+//                        },
+//                        onTerminalNumberChange = {
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnTerminalNumberChange(
+//                                    it
+//                                )
+//                            )
+//                        },
+//                        onCardCodeChange = {
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnCardCodeChange(
+//                                    it
+//                                )
+//                            )
+//                        },
+//                        onPriceListChange = { name, code ->
+//                            viewModel.storageEvents(
+//                                ConfigEvent.Storage.OnPriceListChange(
+//                                    name,
+//                                    code
+//                                )
+//                            )
+//                        },
+//                        onRnc = { viewModel.storageEvents(ConfigEvent.Storage.OnRncChange(it)) },
+//                        onSave = { viewModel.storageEvents(ConfigEvent.Storage.SaveStoreConfig) },
+//                    )
+//                )
 
                 state.error?.let {
                     CustomText(
