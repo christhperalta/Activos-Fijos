@@ -18,7 +18,8 @@ import com.christhperalta.activosfijos.feature.config.domain.repository.ServerCo
 import com.christhperalta.activosfijos.feature.config.domain.repository.StoreConfigRepository
 import com.christhperalta.activosfijos.feature.config.domain.usecase.GetStoreConfigUseCase
 import com.christhperalta.activosfijos.feature.config.presentation.ConfigViewModel
-import com.christhperalta.activosfijos.feature.home.data.api.remote.HomeApiService
+import com.christhperalta.activosfijos.feature.home.data.remote.api.AssetCountApi
+import com.christhperalta.activosfijos.feature.home.data.remote.api.HomeApiService
 import com.christhperalta.activosfijos.feature.home.data.repository.HomeRepositoryImpl
 import com.christhperalta.activosfijos.feature.home.domain.repository.HomeRepository
 import com.christhperalta.activosfijos.feature.home.presentation.HomeViewModel
@@ -49,7 +50,6 @@ val databaseModule = module {
     single<ServerConfigRepository> { ServerConfigRepositoryImpl(get(), get()) }
     single<StoreConfigRepository> { StoreConfigRepositoryImpl(get(),get()) }
     single<ManagerCredentialsConfigRepository> { ManagerCredentialsConfigRepositoryImpl(get(), get()) }
-    single<HomeRepository> { HomeRepositoryImpl(get()) }
 }
 val quotationModule = module {
     single { QuotationCart() }
@@ -65,7 +65,7 @@ val networkModule = module {
     single { createHttpClient() }
     single { PosApiService(get(), get(), get(),get()) }
     single { PdfApiService(get()) }
-    single { HomeApiService(get(), get(), get()) }
+    single<AssetCountApi> { HomeApiService(get(), get(), get()) }
     single { ProductApiService(get(),get(),get(),get()) }
     single { StoreApiService(get(),get(),get()) }
 
@@ -73,6 +73,7 @@ val networkModule = module {
 
 val repositoryModule = module {
     single<LoginRepository> { LoginRepositoryImpl(get()) }
+    single<HomeRepository> { HomeRepositoryImpl(get()) }
     single<PdfRepository> { PdfRepositoryImpl(get()) }
     single<ProductRepository> { ProductRepositoryImpl(get()) }
     single<InventoryRepository> { FakeInventoryRepository() }

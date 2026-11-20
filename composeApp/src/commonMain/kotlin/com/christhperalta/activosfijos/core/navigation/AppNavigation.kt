@@ -123,6 +123,11 @@ fun AppNavigation(startKey: NavKey) {
                         onScanner = { backStack.add(Scanner) },
                         onSummary = { backStack.add(CountSummary) },
                         onAssets = { backStack.add(ScannedAssets) },
+                        onSessionExpired = {
+                            // Se vacía la pila: con la sesión caída, atrás no debe devolver a Home.
+                            while (backStack.isNotEmpty()) backStack.removeLastOrNull()
+                            backStack.add(Login)
+                        },
                     )
                 }
 

@@ -195,6 +195,7 @@
      <!--CustomAlertDialog-->
      <string name="dialog_confirm_label">Confirmar</string>
      <string name="dialog_cancel_label">Cancelar</string>
+     <string name="dialog_accept_label">Aceptar</string>
 
      <!--AppLogo-->
      <string name="app_logo_description">Logo B1PosCotizador</string>
@@ -204,4 +205,5 @@
 
      <!--SessionExpiredAlertDialog-->
     <string name="session_expired_alert_title">Sesión expirada</string>
+    <string name="session_expired_alert_message">Tu sesión ha expirado. Debes iniciar sesión de nuevo.</string>
 </resources>

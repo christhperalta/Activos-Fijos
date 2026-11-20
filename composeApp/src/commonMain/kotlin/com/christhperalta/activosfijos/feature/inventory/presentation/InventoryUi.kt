@@ -1,6 +1,9 @@
 package com.christhperalta.activosfijos.feature.inventory.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -168,4 +171,70 @@ internal fun conditionContainer(condition: AssetCondition): Color = when (condit
     AssetCondition.MAINTENANCE -> MaintenanceContainer
     AssetCondition.PENDING_DECOMMISSION -> DecommissionContainer
     AssetCondition.NOT_FOUND -> NotFoundContainer
+}
+
+/**
+ * Tarjeta de progreso del conteo. Recibe los valores que pinta en lugar de un modelo concreto,
+ * para que la puedan usar el Home (con su `AssetCountSummary`) y `CountSummaryScreen` (con
+ * `InventorySummary`) sin que una feature tenga que importar el dominio de la otra.
+ */
+@Composable
+internal fun InventoryProgressCard(
+    verifiedCount: Int,
+    totalAssets: Int,
+    progress: Float,
+    title: String = "Conteo actual",
+    onClick: (() -> Unit)? = null,
+) {
+    val cardModifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+    InventorySurfaceCard(modifier = cardModifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Row(
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp, horizontal = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(15.dp)
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(bottom = 10.dp)) {
+                            Text(
+                                title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "$verifiedCount de $totalAssets activos verificados",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Text(
+                            "${(progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                "Ver resumen del conteo",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp).weight(0.1f)
+            )
+        }
+    }
 }

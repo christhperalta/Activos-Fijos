@@ -1,45 +1,36 @@
 package com.christhperalta.activosfijos.feature.home.data.repository
 
-import com.christhperalta.activosfijos.core.utils.SapException
-import com.christhperalta.activosfijos.feature.home.data.api.remote.HomeApiService
-import com.christhperalta.activosfijos.feature.home.data.api.remote.quotationsDto.RncDto
-import com.christhperalta.activosfijos.feature.home.domain.model.Quotations
-import com.christhperalta.activosfijos.feature.home.domain.model.Rnc
+import com.christhperalta.activosfijos.feature.home.data.remote.api.AssetCountApi
+import com.christhperalta.activosfijos.feature.home.domain.model.AssetCountSummary
 import com.christhperalta.activosfijos.feature.home.domain.repository.HomeRepository
-
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class HomeRepositoryImpl(
-    private val apiService: HomeApiService
+    private val apiService: AssetCountApi
 ) : HomeRepository {
-    override suspend fun quotation(quotationRequest: Quotations, endPoint: String): Result<String> {
+
+    override suspend fun getAssetCountSummary(): Result<AssetCountSummary> {
         return try {
-            val result = apiService.quotation(quotationRequest, endPoint)
-            return Result.success(result)
-        } catch (e: SapException) {
-            Result.failure(e)
+            // Las cuatro peticiones son independientes: en paralelo el Home carga en el tiempo
+            // de la más lenta, no en la suma de las cuatro.
+            coroutineScope {
+                val pendingToScan = async { apiService.countPendingToScan() }
+                val good = async { apiService.countGoodCondition() }
+                val maintenance = async { apiService.countMaintenance() }
+                val pendingDecommission = async { apiService.countPendingDecommission() }
+
+                Result.success(
+                    AssetCountSummary(
+                        pendingToScanCount = pendingToScan.await(),
+                        goodCount = good.await(),
+                        maintenanceCount = maintenance.await(),
+                        pendingDecommissionCount = pendingDecommission.await(),
+                    )
+                )
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
-    override suspend fun validateRnc(rnc: String): Result<Rnc> {
-        return try {
-            val result = apiService.validateRNC(rnc = rnc)
-            Result.success(result.toDomain())
-        } catch (e: SapException) {
-            Result.failure(e)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-
-    }
-}
-
-
-fun RncDto.toDomain(): Rnc {
-    return Rnc(
-        estatus = this.estatus,
-        name = this.name,
-        rnc = this.rnc
-    )
 }
